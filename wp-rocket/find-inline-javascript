@@ -1,0 +1,6 @@
+var scripts = document.getElementsByTagName("script");
+for (var i=0;i<scripts.length;i++) {
+   if (scripts[i].src) console.log(i,scripts[i].src)
+   else if (scripts[i].dataset.rocketSrc) console.log(scripts[i].dataset.rocketSrc)
+   else console.log(i,scripts[i].innerHTML)
+}
