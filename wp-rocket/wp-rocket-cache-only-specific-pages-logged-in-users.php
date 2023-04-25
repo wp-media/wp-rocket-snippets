@@ -2,7 +2,7 @@
 /**
  * Plugin Name: WP Rocket | Enable Page Caching For Specific Pages or Posts only for logged in users
  * Description: Enables WP Rocket’s page cache file generation only on specific pages.
- * Plugin URI:  https://github.com/wp-media/wp-rocket-helpers/tree/master/cache/wp-rocket-no-cache-for-page/
+ * Plugin URI:  https://github.com/wp-media/wp-rocket-snippets/blob/main/wp-rocket/wp-rocket-cache-only-specific-pages-logged-in-users.php
  * Author:      WP Rocket Support Team
  * Author URI:  https://wp-rocket.me/
  * License:     GNU General Public License v2 or later
