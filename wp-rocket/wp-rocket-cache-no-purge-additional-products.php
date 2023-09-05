@@ -32,7 +32,6 @@ function disable_cache_clearing_files( $urls ) {
     if ( get_post_type( $the_post_id ) === 'product' ) {   
         // returns the first url in the list of urls to be purged
 	    $urls = array_slice( $urls, 0, 1 );
-        error_log(print_r($urls, true));
     }
 
     // returns sliced array with the product post url only
