@@ -1,7 +1,8 @@
 <?php
 /**
- * Plugin Name: WP Rocket | Remove additional URLs from post purge
- * Description: Removes additional URLs from WP Rocket’s automatic cache purging when a post is updated.
+ * Plugin Name: WP Rocket | Remove additional URLs from product purge
+ * Description: Removes additional URLs from WP Rocket’s automatic cache purging when a product is updated.
+ * Plugin URI:  https://github.com/wp-media/wp-rocket-helpers/tree/master/wp-rocket-cache-no-purge-additional-products/
  * Author:      WP Rocket Support Team
  * Author URI:  http://wp-rocket.me/
  * License:     GNU General Public License v2 or later
@@ -10,7 +11,7 @@
  * Copyright SAS WP MEDIA 2023
  */
 
-namespace WP_Rocket\Helpers\cache\no_purge_post_additional_urls;
+namespace WP_Rocket\Helpers\cache\no_purge_product_urls;
 
 // Standard plugin security, keep this line in place.
 defined( 'ABSPATH' ) or die();
@@ -24,18 +25,22 @@ defined( 'ABSPATH' ) or die();
 
 function disable_cache_clearing_files( $urls ) {
 
-    // only the 1st URL in the array
-    $urls = array_slice( $urls, 0, 1 );
-    
-    // returns sliced array with the 1st post url only
+    // get the post id
+    $the_post_id = url_to_postid( $urls[0] );
+
+    // if the post type is product
+    if ( get_post_type( $the_post_id ) === 'product' ) {   
+        // returns the first url in the list of urls to be purged
+	    $urls = array_slice( $urls, 0, 1 );
+    }
+
+    // returns sliced array with the product post url only
 	return $urls;
 }
 add_filter( 'rocket_post_purge_urls', __NAMESPACE__ . '\disable_cache_clearing_files');
 
-// exclude taxonomies from the cleanup too
+// exclude taxonomies from the cleanup in the case of producy cats
 add_filter( 'rocket_exclude_post_taxonomy', function( $taxonomies ) {
     $taxonomies[] = 'product_cat';
-    $taxonomies[] = 'category';
-    $taxonomies[] = 'post_tag';
     return $taxonomies;
 } );
