@@ -1,18 +1,29 @@
-# WP Rocket | Ignore Query Strings
-
-Define query strings that should use the same set of cache.
+# WP Rocket Purge When Files Modified
 
 📝 **Manual code edit required before use!**
 
-You can add new parameter by editing or copying existing line and changing its name in brackets (new_query_string).
-To prevent WP Rocket from caching specific parameter, uncomment 30th line of code and change value (utm_source) to the desired one.
-If you want WP Rocket stop serving cache for more parameters, simply copy the 30th line and change the value.  
+The zipped folder should be unzipped and uploaded anywhere within the WordPress installation.
 
-Documentation: [Customize Query String Caching](https://docs.wp-rocket.me/article/1281-customize-query-string-caching)
+You can specify as many CSS and JS files as needed to be monitored for changes.
+
+You can specify what combination of the following should automatically occur when file changes are detected:
+- Clear Cache
+- Clear RUCSS
+- Clear Minified CSS/JS Files
+
+A server cron should be set to call the wp-rocket-purge-when-files-modified.php script on a consistent interval of your choosing.
+
+The script tracks the last time it was run by creating and using a file called time-last-cron-run.txt that stores the time.
+
+When this script runs, it checks if the files were modified during the time since the script last ran, and if so, it purges Cache, RUCSSS, Minified files (depending on what options are enabled).
+
+The first time the script runs, the time-last-cron-run.txt will not exist, so the purge happens automatically on that first run. Each time after, purging only occurs if the files have been modified.
+
+
 
 To be used with:
 Any setup
 
 Last tested with:
-* WP Rocket {3.4-alpha1}
-* WordPress {5.2.2}
+* WP Rocket {3.15.2}
+* WordPress {6.3.1}
