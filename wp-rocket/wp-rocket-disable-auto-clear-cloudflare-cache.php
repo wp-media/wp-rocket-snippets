@@ -1,9 +1,9 @@
 <?php
 
 /**
- * Plugin Name: WP Rocket | Disable auto clearing Cloudflare cache
- * Description: Deactivate automatic clearing of Cloudflare’s cache after WP Rocket’s cache clear, when the Cloudflare official plugin is used.
- * Plugin URI:  
+ * Plugin Name: WP Rocket | Disable Cloudflare Auto Cache Purge
+ * Description: Prevents WP Rocket from clearing Cloudflare cache as it normally does when WP Rocket's cache is cleared and the Official Cloudflare plugin is in use.
+ * Plugin URI:  http://wp-rocket.me/
  * Author:      WP Rocket Support Team
  * Author URI:  http://wp-rocket.me/
  * License:     GNU General Public License v2 or later
