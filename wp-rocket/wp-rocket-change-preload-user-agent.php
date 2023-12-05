@@ -17,7 +17,7 @@ defined('ABSPATH') or die();
 
 function custom_user_agent( $args ) {
 
-	$args['user-agent'] = 'Shade-control.com User Agent';
+	$args['user-agent'] = 'Fresh User Agent';
 	
 	return $args;
 }
