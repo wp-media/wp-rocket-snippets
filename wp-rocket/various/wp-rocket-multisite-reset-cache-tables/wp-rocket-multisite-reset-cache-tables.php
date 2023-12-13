@@ -19,7 +19,7 @@ defined( 'ABSPATH' ) or die();
 // this is a patch for https://github.com/wp-media/wp-rocket/issues/2746
 function reset_cache_tables() {
     
-  if ( is_multisite()) {
+  if ( is_multisite() && is_main_site()) {
     $sites = get_sites();	
     
     foreach ($sites as $site ) {
