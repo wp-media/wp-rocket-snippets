@@ -1,0 +1,1200 @@
+// ==UserScript==
+// @name         WP Rocket Inspector 2.4.2
+// @namespace    http://tampermonkey.net/
+// @version      2.4.2
+// @description  try to take over the world!
+// @author       You
+// @match        *://*/*
+// @icon         https://www.google.com/s2/favicons?sz=64&domain=mozilla.org
+// @grant        none
+// @run-at       document-end
+// @require      https://raw.githubusercontent.com/Joe12387/detectIncognito/main/dist/es5/detectIncognito.min.js
+// @noframes
+// ==/UserScript==
+
+window.toggle_tester_visibility = toggle_tester_visibility;
+window.rucss_test_send = rucss_test_send;
+window.check_styles = check_styles;
+window.check_scripts = check_scripts;
+window.extract_time = extract_time;
+window.timeConverter = timeConverter;
+window.autoResizeElement = autoResizeElement;
+window.create_table = create_table;
+window.get_file_content = get_file_content;
+window.close_and_clear_cell_modal = close_and_clear_cell_modal
+window.fire = fire;
+window.list_scripts = list_scripts;
+window.grab_scripts = grab_scripts;
+window.grab_inline_scripts = grab_inline_scripts;
+
+function close_and_clear_cell_modal(target_selector) {
+  let target = document.querySelector(target_selector);
+  document.body.style.overflow = '';
+  document.querySelector('.overlay_table').style.overflow = '';
+  target.toggleAttribute('hidden');
+  document.querySelector('.cell_content').innerHTML = "";
+}
+
+function create_table(target_array, target) {
+  let table_holder = document.createElement('div');
+  table_holder.setAttribute('id', target);
+  table_holder.setAttribute('hidden', '');
+  table_holder.classList.add('overlay_table');
+  table_holder.innerHTML = `
+<div class="cell_modal" hidden>
+<wpr_metas><wpr_button class="table_close" onclick="window.close_and_clear_cell_modal(\'.cell_modal\')" class="remove_rucss_tester">Close the table</wpr_button>
+</wpr_metas>
+<div class="cell_content"></div>
+</div>
+<style>
+
+.cell_content{
+width: 100%;
+height: 90vh;
+padding: 10%;
+}
+
+.overlay_table .text pre, .cell_modal pre {
+width: 100% !important;
+white-space: pre-wrap;
+}
+
+.overlay_table, .cell_modal {
+font-family: Arial, Helvetica, sans-serif;
+width: 100%;
+height: 100vh;
+padding: 10px;
+position: fixed;
+top: 0;
+left: 0;
+z-index: 999999999999;
+background: white;
+overflow: auto;
+border-collapse: collapse;
+  margin: 0;
+  font-size: 0.9em;
+  font-family: sans-serif;
+  min-width: 400px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+.overlay_table table {
+font-size: 10px;
+width: 100%;
+table-layout: fixed;
+}
+
+.overlay_table thead tr {
+  background-color: #009879;
+  color: #ffffff;
+  text-align: left;
+}
+
+.overlay_table th,
+.overlay_table td {
+  padding: 12px 15px;
+}
+
+.overlay_table tbody tr {
+  border-bottom: 1px solid #dddddd;
+}
+
+.overlay_table tbody tr:nth-of-type(even) {
+  background-color: #f3f3f3;
+}
+
+.overlay_table tbody tr:last-of-type {
+  border-bottom: 2px solid #009879;
+}
+
+.overlay_table tbody tr.active-row {
+  font-weight: bold;
+  color: #009879;
+}
+
+.overlay_table td, .overlay_table th {
+padding: 8px;
+}
+/*
+.overlay_table tr:nth-child(even){
+background-color: #f2f2f2;
+}
+
+.overlay_table tr:hover {
+background-color: #ddd;
+}
+*/
+.overlay_table_filter {
+padding: 10px;
+width: 98%;
+margin: 10px 1%;
+}
+
+wpr_table_wrapper, wpr_table_inner, wpr_metas {
+display: block;
+position: relative;
+}
+
+wpr_button.table_close {
+width: 98%;
+display: block;
+float: right;
+cursor: pointer;
+text-align: center;
+text-transform: uppercase;
+font-weight: bold;
+}
+
+.overlay_table .id, .overlay_table .status, .overlay_table .className {
+width: 10%;
+}
+
+.overlay_table .src {
+width: 25%;
+}
+
+.overlay_table .text {
+width: 45%;
+}
+
+wpr_metas {
+position: sticky;
+background: white;
+}
+
+</style>
+`;
+  document.body.insertAdjacentElement('beforeend', table_holder);
+  let scripts_table = '<wpr_metas><wpr_button class="table_close" onclick="window.check_scripts(\'#result_table\')" class="remove_rucss_tester">Close the table</wpr_button><input type="text" class="'+target+'_filter overlay_table_filter" data-table="order-table" placeholder="Item to filter.." /></wpr_metas>';
+  scripts_table += "<table id='"+target+"_data'>";
+  scripts_table += "<thead>";
+  for (var cell_item_header of ['status', 'id', 'className', 'src', 'text']) {
+	  scripts_table += "<th class="+cell_item_header+">" + cell_item_header + "</th>";
+  }
+  scripts_table += "</thead>";
+  scripts_table += "<tbody>";
+  let cell_content;
+  let executed;
+  let ignore = ['ld+json']
+  for (var cell_item of target_array) {
+	  let visibility = '';
+	  let ignored = ignore.some(element => {
+		  if (cell_item.outerHTML.includes(element.toLowerCase())) {
+			  console.log('ignored',cell_item)
+			  visibility = 'hidden';
+		  }
+	  });
+	  scripts_table += "<tr "+visibility+">";
+	  executed = '';
+	  if(cell_item.attributes[0] && (cell_item.attributes[0]['textContent'] === 'executed')) {
+		  executed = 'Was delayed<span hidden>djey</span>';
+	  } else {
+		  executed = 'Not delayed<span hidden>djen</span>';
+	  }
+	  scripts_table += "<td class='status'>" + executed + "</td>";
+	  scripts_table += "<td class='id'>" + cell_item.id + "</td>";
+	  scripts_table += "<td class='className'>" + cell_item.className + "</td>";
+	  scripts_table += "<td class='src'>" + cell_item.src + "</td>";
+	  if(cell_item.src) {
+		  cell_content = get_file_content(cell_item.src);
+	  } else {
+		  cell_content = cell_item.text;
+	  }
+	  scripts_table += "<td class='text'><pre>"+cell_content+"</pre></td>";
+	  scripts_table += "</tr>";
+  }
+  scripts_table += "</tbody>";
+  scripts_table += "</table>";
+
+  let scripts_modal = `
+<wpr_table_wrapper>
+<wpr_table_inner>
+	`+scripts_table+`
+</wpr_table_inner>
+</wpr_table_wrapper>
+`;
+
+  document.querySelector('#' + target).innerHTML += scripts_modal;
+
+
+  async function loadAsync(src) {
+	  const script = document.createElement('script');
+	  script.src = src;
+	  return new Promise((resolve, reject) => {
+		  script.onreadystatechange = function () {
+			  if (script.readyState === 'loaded' || script.readyState === 'complete') {
+				  script.onreadystatechange = null;
+				  resolve(true);
+			  }
+		  };
+		  document.getElementsByTagName('head')[0].appendChild(script);
+	  });
+  }
+  // loadAsync(`https://cdnjs.cloudflare.com/ajax/libs/body-scroll-lock/3.1.5/bodyScrollLock.min.js`).then(_=> { console.log('bodyScrollLock.min.js loaded'); });
+
+  let table_search_field = document.querySelector('.'+target+'_filter');
+
+  table_search_field.addEventListener("keyup",function(){
+	  var keyword = this.value;
+	  keyword = keyword.toUpperCase();
+	  var target_table = document.getElementById(target+"_data");
+	  var all_tr = target_table.getElementsByTagName("tr");
+	  var j;
+	  for(var i=0; i<all_tr.length; i++){
+		  var all_columns = all_tr[i].getElementsByTagName("td");
+		  for(j=0;j<all_columns.length; j++){
+			  if(all_columns[j]){
+				  var column_value = all_columns[j].textContent || all_columns[j].innerText;
+				  column_value = column_value.toUpperCase();
+				  if(column_value.indexOf(keyword) > -1){
+					  all_tr[i].style.display = ""; // show
+					  break;
+				  }else{
+					  all_tr[i].style.display = "none"; // hide
+				  }
+			  }
+		  }
+	  }
+  });
+
+  sessionStorage.setItem("scripts_scrapped", "");
+}
+
+function get_file_content(url) {
+  let excludes = [];
+  excludes = [
+	  'connect.facebook.net',
+	  'static.mailerlite.com',
+	  'google-analytics.com',
+	  'googletagmanager.com'
+  ];
+  let excluded = excludes.some(element => {
+	  if (url.toLowerCase().includes(element.toLowerCase())) {
+		  return true;
+	  }
+	  return false;
+  });
+  if(excluded) {
+	  return "URL can't be scrapped";
+  }
+  var wprrequest;
+  wprrequest = new XMLHttpRequest();
+  wprrequest.open('GET', url, false);
+  let html;
+  wprrequest.send();
+  wprrequest.onreadystatechange = function (oEvent) {
+	  if (wprrequest.readyState === 4) {
+		  if (wprrequest.status === 200) {
+			  html = wprrequest.responseText;
+		  } else {
+			  html = "Access denied";
+		  }
+	  }
+  };
+
+  return html;
+}
+
+function autoResize() {
+  this.style.height = 'auto';
+  this.style.height = this.scrollHeight + 'px';
+}
+
+function autoResizeElement(element) {
+  element.style.height = 'auto';
+  element.style.height = element.scrollHeight + 'px';
+}
+
+let status_red = '#ff408199';
+let status_green = '#8bc34aab';
+let status_orange = '#ff8f0099';
+let status_gray = '#eee';
+let color_blue = '#2196f396';
+let color_light = 'rgba(255,255,255,.95)';
+let inspector_html = `
+<style class="inspector_style">
+wpr_wrapper * {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol" !important;
+}
+
+wpr_wrapper {
+  border-radius: 3px;
+  overflow: hidden;
+  box-shadow: rgb(0 0 0 / 16%) 0px 10px 36px 0px, rgb(0 0 0 / 6%) 0px 0px 0px 1px;
+  position: fixed;
+  z-index: 999999999;
+  bottom: 50%;
+  left: 5px;
+  max-width: 100px;
+}
+
+wpr_title,
+wpr_item {
+  box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
+  text-transform: none;
+  width: 100%;
+  color: white;
+  padding: 3px 10px;
+  line-height: 1em;
+  font-size: 10px;
+  font-weight: bold;
+  float: left;
+}
+
+wpr_title {
+  background: #333333b0;
+  color: white;
+}
+
+wpr_title {
+  background: #333;
+  color: white;
+}
+
+wpr_item {
+  transition: all .2s ease-in;
+  background: `+status_gray+`;
+  color: #999;
+}
+
+wpr_item.enabled {
+  background: `+status_green+`;
+  color: `+color_light+`;
+}
+
+wpr_item.disabled {
+  background: `+status_red+`;
+  color: `+color_light+`;
+}
+
+wpr_item.unsure {
+  background: `+status_orange+`;
+  color: `+color_light+`;
+}
+
+wpr_item.hide {
+  display: `+color_light+`;
+}
+
+wpr_item[tool] {
+  background: `+color_blue+`;
+  color: `+color_light+`;
+  cursor: pointer;
+}
+
+wpr_extra {
+  display: inline !important;
+  font-size: 8px;
+}
+
+wpr_extra[clickable] {
+  cursor: pointer;
+}
+</style>
+<wpr_section_wrapper>
+  <wpr_title>Inspector</wpr_title>
+  <wpr_item feature="cache">Cache</wpr_item>
+  <wpr_item feature="cache_time">Cache Creation<br><wpr_extra class="cache_creation">N/A</wpr_extra></wpr_item>
+  <wpr_item feature="rucss">RUCSS</wpr_item>
+  <wpr_item feature="cpcss">CPCSS</wpr_item>
+  <wpr_item feature="dje">DJE</wpr_item>
+  <wpr_item feature="lazyload">Lazyload</wpr_item>
+  <wpr_item feature="preload_links">PL Links</wpr_item>
+  <wpr_item feature="css_minify">CSS Minify</wpr_item>
+  <wpr_item feature="js_minify">JS Minify</wpr_item>
+  <wpr_item feature="rocketcdn">RocketCDN</wpr_item>
+</wpr_section_wrapper>
+<wpr_section_wrapper>
+  <wpr_title>Tools</wpr_title>
+  <wpr_item tool="rucss_tester" onclick="window.toggle_tester_visibility(document.querySelector('.wpr_tester_wrapper_element'))">RUCSS Tester</wpr_item>
+  <wpr_item tool="list_scripts" onclick="window.list_scripts()">List Scripts</wpr_item>
+</wpr_section_wrapper>
+`;
+
+/*
+function create_wpr_inspector_item(target, type, content, hidden) {
+  let wpr_inspector_item = document.createElement(type);
+  // let wpr_inspector_item = document.createElement(type);
+  if(hidden) {
+	  wpr_inspector_item.setAttribute('hidden','');
+	  wpr_inspector_item.setAttribute('status','hidden');
+  }
+  wpr_inspector_item.innerHTML = content;
+  target.insertAdjacentElement('beforeend', wpr_inspector_item);
+}
+*/
+
+function create_shadow(target, type, content, hidden) {
+  let hidden_attribute = 'hidden';
+  let element = document.createElement('div');
+  element.classList.add(type+'_element');
+  if(hidden) {
+	  element.setAttribute('hidden','');
+  }
+  let holder = document.createElement('div');
+  holder.innerHTML = '<template class="'+type+'_shadow">'+content+'</template>';
+  holder.classList.add(type+'_holder');
+  holder.setAttribute('hidden','');
+  target.insertAdjacentElement('beforeend', holder);
+  target.insertAdjacentElement('beforeend', element);
+}
+
+function apply_shadow(target) {
+  let template = document.getElementsByClassName(target+'_shadow')[0].innerHTML;
+  let shadowElement = document.getElementsByClassName(target+'_element')[0];
+  let shadow = shadowElement.attachShadow({
+	  mode: 'open'
+  });
+
+  shadow.innerHTML = `
+${template}
+`;
+  document.getElementsByClassName(target+'_shadow')[0].parentNode.remove();
+}
+
+
+function create_element(target, type, content, hidden) {
+  create_shadow(target, type, content,hidden);
+  apply_shadow(type);
+}
+
+// Checks
+
+function wpr_process_the_check(target,status,console_message) {
+  let shadowroot_wpr_wrapper = document.querySelector('.wpr_wrapper_element').shadowRoot;
+  let item = shadowroot_wpr_wrapper.querySelector("[feature='"+target+"']");
+  item.classList.add(status);
+  console.log(console_message);
+}
+
+function timeConverter(UNIX_timestamp){
+  var a = new Date(UNIX_timestamp * 1000);
+  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var year = a.getFullYear();
+  var month = ("0" + (a.getMonth() + 1)).slice(-2)
+  var date = a.getDate();
+  var hour = a.getHours();
+  var min = a.getMinutes();
+  var sec = a.getSeconds();
+  var time = date + '/' + month + '/' + year + ' ' + hour + ':' + min + ':' + sec ;
+  return time;
+}
+
+function extract_time(signature) {
+  let regex_time = /cached@(.*)/;
+  timeConverter(regex_time.exec(signature.data)[1]);
+}
+
+function get_response_headers(url) {
+  var req = new XMLHttpRequest();
+  req.open('HEAD', url, false);
+  req.send(null);
+  return req.getAllResponseHeaders();
+}
+
+function get_cache_exclusions() {
+  const signature_nullifiers = ['siteground','cloudflare','somethingelse'];
+  let cache_exclusion = "none";
+  for (var exclusion = 0; exclusion < signature_nullifiers.length; exclusion++) {
+	  if(get_response_headers(document.location.href).includes(signature_nullifiers[exclusion])) {
+		  cache_exclusion = signature_nullifiers[exclusion];
+	  }
+  }
+  return cache_exclusion;
+}
+
+// Process status check for each feature
+
+function wpr_checks() {
+  // Variables
+  const page_html = document.documentElement.innerHTML;
+  let console_message = '';
+  let status = '';
+  let color = '';
+  let target = '';
+  let extra = '';
+  let signature = '';
+  let shadowroot_wpr_wrapper = document.querySelector('.wpr_wrapper_element').shadowRoot;
+  if(document.documentElement.nextSibling) {
+	  signature = document.documentElement.nextSibling.data;
+  }
+  // Page cache
+  if(signature) {
+	  console_message = 'Page is optimized';
+	  status = 'unsure';
+	  if (signature.includes('Debug: cached')) {
+		  let regex_time = /cached@(.*)/;
+		  shadowroot_wpr_wrapper.querySelector('.cache_creation').innerHTML = timeConverter(regex_time.exec(signature)[1]);
+		  shadowroot_wpr_wrapper.querySelector('.cache_creation').parentElement.classList.add("enabled");
+		  console_message = 'Page is optimized and cached';
+		  status = 'enabled';
+	  }
+  } else {
+	  shadowroot_wpr_wrapper.querySelector('.cache_creation').parentElement.classList.add("disabled");
+	  if (get_cache_exclusions() !== "none" && status !== 'enabled') {
+		  console_message = 'Page is optimized and possibly cached ('+get_cache_exclusions()+' might have removed the signature tag)';
+		  status = 'unsure';
+	  } else {
+		  console_message = 'Page is not optimized or cache';
+		  status = 'disabled';
+	  }
+  }
+  target = "cache";
+  if (get_cache_exclusions() !== "none" && status !== 'enabled') {
+	  extra = ' <wpr_extra style="display:block;font-size:7px">'+get_cache_exclusions()+'<wpr_extra>';
+  }
+  if(extra) {
+	  if(!shadowroot_wpr_wrapper.querySelector('[feature=cache]').innerHTML.includes(get_cache_exclusions())) {
+		  shadowroot_wpr_wrapper.querySelector("[feature='cache']").innerHTML += extra;
+	  }
+  }
+  wpr_process_the_check(target,status,console_message);
+
+  // RUCSS
+  let check_for_rucss = document.getElementById('wpr-usedcss');
+  if (check_for_rucss !== null) {
+	  console_message = 'RUCSS is used';
+	  status = 'enabled';
+  } else {
+	  console_message = 'RUCSS is not used';
+	  status = 'disabled';
+  }
+  target = "rucss";
+  wpr_process_the_check(target,status,console_message);
+
+  // CPCSS
+  target = "cpcss";
+  console.log(status)
+  if(status === 'disabled') {
+	  if (page_html.includes('wprRemoveCPCSS') !== false) {
+		  console_message = 'CPCSS is used';
+		  status = 'enabled';
+	  } else {
+		  console_message = 'CPCSS is not used';
+		  status = 'disabled';
+	  }
+	  wpr_process_the_check(target,status,console_message);
+  } else {
+	  wpr_process_the_check(target,'disabled','RUCSS is enabled, so no CPCSS');
+  }
+
+  // DJE
+  let check_for_dje_script = (page_html.match(/RocketLazyLoadScripts/g) || []).length - 1;
+  if (check_for_dje_script > 1) {
+	  console_message = 'DJE used';
+	  status = 'enabled';
+	  extra = ' <wpr_extra clickable onclick="window.check_scripts(\'#result_table\')">check scripts</wpr_extra>';
+	  if(!shadowroot_wpr_wrapper.querySelector('[feature=dje]').innerHTML.includes('check scripts')) {
+		  shadowroot_wpr_wrapper.querySelector("[feature='dje']").innerHTML += extra;
+	  }
+  } else {
+	  console_message = 'DJE not used';
+	  status = 'disabled';
+  }
+  target = "dje";
+  wpr_process_the_check(target,status,console_message);
+
+  // Lazyload
+  // let check_for_ll_script = (page_html.match(/window.lazyLoadOptions/g) || []).length;
+  let check_for_ll_script = page_html.indexOf("wp-rocket/assets/js/lazyload");
+
+  if (check_for_ll_script !== -1) {
+	  console_message = 'Lazyload used';
+	  status = 'enabled';
+  } else {
+	  console_message = 'Lazyload not used';
+	  status = 'disabled';
+  }
+  target = "lazyload";
+  wpr_process_the_check(target,status,console_message);
+
+  // PL Links
+  let check_for_pll_script = (page_html.match(/RocketPreloadLinksConfig/g) || []).length - 1;
+  if (check_for_pll_script > 1) {
+	  console_message = 'Preload Links used';
+	  status = 'enabled';
+  } else {
+	  console_message = 'Preload Links not used';
+	  status = 'disabled';
+  }
+  target = "preload_links";
+  wpr_process_the_check(target,status,console_message);
+
+  // CSS Minify
+  let check_for_css_minify = (page_html.match(/cache\/min\/1\/[a-zA-Z0-9_](.*).css/) || []).length;
+  target = "css_minify";
+  if (check_for_css_minify > 0) {
+	  console_message = 'CSS Combine is used';
+	  status = 'enabled';
+	  status = 'enabled';
+  } else {
+	  status = 'disabled';
+  }
+  wpr_process_the_check(target,status,console_message);
+
+  // JS Minify
+  target = "js_minify";
+  let check_for_js_minify = (page_html.match(/cache\/min\/1\/[a-zA-Z0-9_](.*).js/) || []).length;
+  if (check_for_js_minify > 0) {
+	  console_message = 'CSS Combine is used';
+	  status = 'enabled';
+  } else {
+	  status = 'disabled';
+  }
+  wpr_process_the_check(target,status,console_message);
+
+// RocketCDN
+  let check_for_rocketcdn_script = page_html.indexOf("rocketcdn.me");
+
+  if (check_for_rocketcdn_script !== -1) {
+	  console_message = 'RocketCDN used';
+	  status = 'enabled';
+  } else {
+	  console_message = 'RocketCDN not used';
+	  status = 'disabled';
+  }
+  target = "rocketcdn";
+  wpr_process_the_check(target,status,console_message);
+  console.log('WPR Inspector: Nothing else to check! Bye 👋');
+}
+
+// RUCSS Tester
+
+let tester_html = `
+<style class="inspector_style">
+wpr_label,
+wpr_textarea,
+wpr_button,
+wpr_input {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+wpr_section_inner {
+  position: relative;
+  display: block;
+}
+
+wpr_input {
+  border: 1px solid #999;
+  border-radius: 3px;
+  cursor: pointer;
+  height: 15px;
+  width: 15px;
+  display: block;
+  float: left;
+  position: relative;
+  line-height: 15px;
+  font-size: 15px;
+}
+
+wpr_button {
+  cursor: pointer;
+  float: left;
+}
+
+wpr_input[ticked]:before {
+  content: '✔️';
+  font-size: 10px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 15px;
+  width: 15px;
+  line-height: 12px;
+}
+
+wpr_tester_wrapper * {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol" !important;
+}
+
+wpr_tester_wrapper {
+  box-shadow: rgba(100, 100, 111, .2) 0 7px 29px 0 !important;
+  position: fixed !important;
+  bottom: 0 !important;
+  z-index: 999999999 !important;
+  padding: 20px !important;
+  background: #fff !important;
+  max-width: 600px !important
+}
+
+wpr_textarea,
+textarea {
+  border: 1px solid #999 !important;
+  border-radius: 3px !important;
+  margin-bottom: 10px !important;
+  padding: 15px 2% !important;
+  width: 96% !important;
+  display: block;
+  overflow: hidden;
+  resize: both;
+  min-height: 40px;
+  line-height: 20px;
+}
+
+.submit_rucss_test {
+  text-align: center !important;
+  float: left !important;
+  background: #512DA8 !important;
+  color: #fff !important;
+  margin: 20px 0 10px !important;
+  font-size: 15px !important;
+  width: 100% !important;
+  padding: 10px 30px !important;
+  border-radius: 3px !important;
+  border: none !important;
+  text-transform: uppercase !important;
+  font-weight: 700 !important
+}
+
+.submit_rucss_check_styles {
+  width: 100% !important;
+  text-align: center;
+  text-transform: uppercase !important;
+  margin: 0 auto !important;
+  display: block !important;
+  padding: 10px !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  border-radius: 3px !important;
+  background: #eee !important
+}
+
+#wpr_rucss_legend {
+  padding: 0 10px !important
+}
+
+#wpr_rucss_fieldset {
+  margin: 0 !important;
+  width: 100% !important;
+  border-radius: 3px !important;
+  float: left !important;
+  border: 1px solid #ddd !important;
+  padding: 10px !important
+}
+
+#wpr_rucss_fieldset div {
+  width: 150px !important;
+  float: left !important;
+  margin-bottom: initial !important
+}
+
+wpr_label {
+  margin: 0 0 10px !important;
+  line-height: 15px !important;
+  font-size: 15px !important;
+  color: #333 !important;
+  display: block !important
+}
+
+wpr_label.wpr_rucss_label {
+  margin-left: 20px !important;
+}
+
+.remove_rucss_tester,
+.remove_rucss_tester:hover {
+  padding: 0 !important;
+  border: 0 !important;
+  font-size: 20px !important;
+  width: 30px;
+  height: 30px;
+  text-align: center;
+  line-height: 30px;
+  border-radius: 9999px;
+  position: absolute;
+  top: -15px;
+  right: -15px;
+  background: none;
+  cursor: pointer;
+  color: #fff
+}
+</style>
+<wpr_section_inner>
+<wpr_label>Patterns to safelist</wpr_label>
+<textarea is="textarea" contenteditable="true" spellcheck="false" tabindex="0" data-enable-grammarly="false" name="safelist" class="rucss_test_safelist" placeholder="Safelist patterns go here"></textarea>
+<wpr_label>Inline CSS to preserve</wpr_label>
+<textarea is="textarea" contenteditable="true" spellcheck="false" tabindex="0" data-enable-grammarly="false" name="preserve" class="rucss_test_inline_preserve" placeholder="Safelist patterns go here"></textarea>
+<wpr_input onclick="toggleAttribute('ticked')" is="input" type="checkbox" id="wpr_rucss_home" name="wpr_rucss_home" ticked></wpr_input><wpr_label class="wpr_rucss_label" for="wpr_rucss_home">Home?</wpr_label>
+<wpr_input onclick="toggleAttribute('ticked')" is="input" type="checkbox" id="wpr_rucss_mobile" name="wpr_rucss_mobile"></wpr_input><wpr_label class="wpr_rucss_label" for="wpr_rucss_mobile">Mobile?</wpr_label>
+<wpr_button onclick="window.rucss_test_send()" class="submit_rucss_test">Submit RUCSS test</wpr_button>
+<wpr_button onclick="window.check_styles()" class="submit_rucss_check_styles">Check inline CSS/Links (results on the browser console)</wpr_button>
+<wpr_button onclick="window.toggle_tester_visibility(document.querySelector('.wpr_tester_wrapper_element'))" class="remove_rucss_tester">❎</wpr_button>
+</wpr_section_inner>
+`;
+
+function setCookie(cname, cvalue, exdays) {
+  const d = new Date();
+  d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+  let expires = "expires=" + d.toUTCString();
+  document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+}
+
+function getCookie(cname) {
+  let name = cname + "=";
+  let ca = document.cookie.split(';');
+  for (let i = 0; i < ca.length; i++) {
+	  let c = ca[i];
+	  while (c.charAt(0) == ' ') {
+		  c = c.substring(1);
+	  }
+	  if (c.indexOf(name) == 0) {
+		  return c.substring(name.length, c.length);
+	  }
+  }
+  return "";
+}
+
+function deleteCookie(name) {
+  setCookie(name, "", null, null, null, 1);
+}
+
+function toggle_tester_visibility(item) {
+  if(item.getAttribute('hidden') !== null) {
+	  setCookie('rucss_tester', 'added');
+  } else {
+	  deleteCookie('rucss_tester');
+  }
+  item.toggleAttribute('hidden');
+}
+
+function inject_style_sheet(path) {
+  let css = document.createElement('link');
+  let shadowroot_wpr_wrapper = document.querySelector('.wpr_wrapper_element').shadowRoot;
+  css.rel = 'stylesheet';
+  css.media = 'all';
+  css.href = path;
+  document.querySelectorAll('head')[0].appendChild(css);
+  if(!shadowroot_wpr_wrapper.querySelector('[feature=rucss]').innerText.includes('TEST MODE')) {
+	  shadowroot_wpr_wrapper.querySelector('[feature=rucss]').classList.remove("disabled");
+	  shadowroot_wpr_wrapper.querySelector('[feature=rucss]').classList.add("enabled");
+	  shadowroot_wpr_wrapper.querySelector('[feature=rucss]').innerHTML = shadowroot_wpr_wrapper.querySelector('[feature=rucss]').innerHTML + ' <wpr_extra>(test mode)</wpr_extra>';
+  }
+}
+
+function unixTimestamp() {
+  return Math.floor(
+	  Date.now() / 1000
+  )
+}
+
+
+function rucss_test_send() {
+  let rucss_mobile = '';
+  let rucss_home = '';
+  let shadowroot_wpr_tester_wrapper = document.querySelector('.wpr_tester_wrapper_element').shadowRoot;
+  let rucss_safelist_items_page = shadowroot_wpr_tester_wrapper.querySelector('.rucss_test_safelist').value;
+
+  while(rucss_safelist_items_page.search('\n\n') > -1) {
+	  if(rucss_safelist_items_page.search('\n\n') === -1) {
+		  break;
+	  } else {
+		  rucss_safelist_items_page = rucss_safelist_items_page.replace('\n\n', '\n');
+	  }
+  }
+
+  let rucss_safelist_items_value = rucss_safelist_items_page.split('\n');
+
+  if (shadowroot_wpr_tester_wrapper.querySelector('#wpr_rucss_mobile').attributes.ticked) {
+	  rucss_mobile = '&mobile';
+  }
+  if (shadowroot_wpr_tester_wrapper.querySelector('#wpr_rucss_home').attributes.ticked) {
+	  rucss_home = '&home';
+  }
+  let grab_all_styles = document.querySelectorAll('style,link[rel="stylesheet"]');
+  let inline_rucss_to_preserve_page = shadowroot_wpr_tester_wrapper.querySelector('.rucss_test_inline_preserve').value;
+  grab_all_styles.forEach(item => assess_and_remove(item, inline_rucss_to_preserve_page));
+  inject_style_sheet('https://mega.wp-rocket.me/support/wpr-rucss.php?url=' + window.location.href + '&safelist=' + encodeURIComponent(JSON.stringify(rucss_safelist_items_value)) + '&' + unixTimestamp() + rucss_mobile + rucss_home);
+}
+
+function assess_and_remove(item,inline_rucss_to_preserve_page) {
+  var inline_rucss_to_preserve = ['#wpcb-quick-actions-menu', 'wpr_rucss_style', 'admin-bar.min.css', 'dashicons.min.css', 'inspector_style'];
+  if(inline_rucss_to_preserve_page) {
+	  inline_rucss_to_preserve = inline_rucss_to_preserve.concat(inline_rucss_to_preserve_page.split('\n'));
+  }
+  if (inline_rucss_to_preserve.some(inline_rucss_to_preserve_item => item.outerHTML.toString().includes(inline_rucss_to_preserve_item))) {} else {
+	  item.remove();
+  }
+}
+
+/*
+function assess_and_remove(item,inline_rucss_to_preserve_page) {
+  var allexternal = new RegExp(/\allexternal/);
+  var allinline = new RegExp(/\allexternal/);
+	var inline_rucss_to_preserve = ['#wpcb-quick-actions-menu', 'wpr_rucss_style', 'admin-bar.min.css', 'dashicons.min.css', 'inspector_style'];
+	if(inline_rucss_to_preserve_page) {
+		inline_rucss_to_preserve = inline_rucss_to_preserve.concat(inline_rucss_to_preserve_page.split('\n'));
+	}
+	if (inline_rucss_to_preserve.some(inline_rucss_to_preserve_item => item.outerHTML.toString().includes(inline_rucss_to_preserve_item))) {} else {
+	  if (allexternal.test(inline_rucss_to_preserve_page))) {} else {
+		item.remove();
+	  }
+	  if (allinline.test(inline_rucss_to_preserve_page)) {} else {
+		item.remove();
+	  }
+	  if (item.includes('mega.wp-rocket.me/support')) {
+		item.remove();
+	  }
+	}
+}
+*/
+
+
+function rucss_wprtextareas_data_management_store() {
+  let shadowroot_wpr_tester_wrapper = document.querySelector('.wpr_tester_wrapper_element').shadowRoot;
+  const rucss_texareas = shadowroot_wpr_tester_wrapper.querySelectorAll('textarea[name]');
+
+  rucss_texareas.forEach(item => {
+	  item.addEventListener('input', function() {
+		  let wprtextarea_content = item.value;
+		  wprtextarea_content = wprtextarea_content.split('\n');
+		  localStorage.setItem(item.name, wprtextarea_content);
+	  }, false);
+  });
+}
+
+function rucss_wprtextareas_data_management_populate_by_name() {
+  if (document.querySelectorAll('.rucss_test_inline_preserve, .rucss_test_safelist')) {
+	  let shadowroot_wpr_tester_wrapper = document.querySelector('.wpr_tester_wrapper_element').shadowRoot;
+	  const rucss_texareas = shadowroot_wpr_tester_wrapper.querySelectorAll('.rucss_test_inline_preserve, .rucss_test_safelist');
+	  let item_content;
+	  rucss_texareas.forEach(item => {
+		  if (localStorage[item.name]) {
+			  item_content = localStorage[item.name].split(",").join("\n");
+			  item.innerHTML = item_content.replace('&nbsp;', ' ');
+			  // autoResizeElement(item);
+		  }
+	  }, false);
+  }
+}
+
+function waitForElm(selector) {
+  return new Promise(resolve => {
+	  if (document.querySelector(selector)) {
+		  return resolve(document.querySelector(selector));
+	  }
+
+	  const observer = new MutationObserver(mutations => {
+		  if (document.querySelector(selector)) {
+			  resolve(document.querySelector(selector));
+			  observer.disconnect();
+		  }
+	  });
+
+	  observer.observe(document.body, {
+		  childList: true,
+		  subtree: true
+	  });
+  });
+}
+
+function check_styles() {
+  console.table(Array.from(document.querySelectorAll('style,link[rel="stylesheet"]')), ['tagName', 'id', 'className', 'href']);
+}
+/*
+function check_scripts() {
+  console.log("%cDelayed Scripts", "font-size:13px");
+  console.table(Array.from(document.querySelectorAll('script[data-dje-status]')), ['id', 'className', 'src', 'text']);
+  console.log("%cNon-delayed Scripts", "font-size:13px");
+  console.table(Array.from(document.querySelectorAll('script:not([data-dje-status])')), ['id', 'className', 'src', 'text']);
+}
+*/
+
+function check_scripts(target_selector) {
+  let target = document.querySelector(target_selector);
+  if ( !sessionStorage.getItem("scripts_scrapped")) {
+	  create_table(document.querySelectorAll('script'), 'result_table');
+	  console.log('Scripts table created');
+	  waitForElm(target_selector).then((elm) => {
+		  elm.toggleAttribute('hidden');
+		  if( elm.hasAttribute('hidden')) {
+			  document.body.style.overflow = '';
+			  document.querySelector('.overlay_table').style.overflow = '';
+		  } else {
+			  document.body.style.overflow = 'hidden';
+			  document.querySelector('.overlay_table').style.overflow = 'hidden';
+		  }
+	  });
+  } else {
+	  target.toggleAttribute('hidden');
+	  if( target.hasAttribute('hidden')) {
+		  document.body.style.overflow = '';
+	  } else {
+		  document.body.style.overflow = 'hidden';
+	  }
+  }
+
+  waitForElm('td.text').then((elm) => {
+	  document.querySelectorAll('td.text').forEach(item => {
+		  item.addEventListener('click', event => {
+			  document.querySelector('.cell_content').innerHTML = item.innerHTML;
+			  document.querySelector('.cell_modal').toggleAttribute('hidden');
+			  if( document.querySelector('.cell_content').hasAttribute('hidden')) {
+				  document.body.style.overflow = '';
+			  } else {
+				  document.body.style.overflow = 'hidden';
+			  }
+		  });
+	  })
+  });
+
+}
+
+
+
+let css_code = `
+.wpr_wrapper_element,
+.wpr_tester_wrapper_element {
+  all: initial !important;
+}
+
+.wpr_wrapper_element *,
+.wpr_tester_wrapper_element * {
+  all: unset !important;
+}
+
+[contenteditable] {
+  outline: 1px solid transparent;
+}
+
+.wpr_wrapper_element,
+.wpr_tester_wrapper_element {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol" !important;
+}
+
+.wpr_wrapper_element {
+  border-radius: 3px !important;
+  overflow: visible !important;
+  box-shadow: rgb(0 0 0 / 16%) 0px 10px 36px 0px, rgb(0 0 0 / 6%) 0px 0px 0px 1px !important;
+  position: fixed !important;
+  z-index: 999999999 !important;
+  bottom: 50% !important;
+  left: 5px !important;
+  max-width: 75px !important;
+}
+
+.wpr_tester_wrapper_element {
+  box-shadow: rgba(100, 100, 111, .2) 0 7px 29px 0 !important;
+  position: fixed !important;
+  bottom: 0 !important;
+  z-index: 999999999 !important;
+  padding: 20px !important;
+  background: #fff !important;
+  max-width: 600px !important;
+  left: 0 !important;
+}
+
+.wpr_tester_wrapper_element[hidden] {
+  display: none !important;
+}
+`;
+
+function calcHeight(value) {
+  let numberOfLineBreaks = (value.match(/\n/g) || []).length;
+  // min-height + lines x line-height + padding + border
+  let newHeight = 20 + numberOfLineBreaks * 20 + 12 + 2;
+  return newHeight;
+}
+
+function textarea_responsive(){
+  let shadowroot_wpr_tester_wrapper = document.querySelector('.wpr_tester_wrapper_element').shadowRoot;
+  let wpr_text_areas = shadowroot_wpr_tester_wrapper.querySelectorAll("textarea");
+
+  wpr_text_areas.forEach(item => {
+	  item.style.height = calcHeight(item.value) + "px";
+	  item.addEventListener('keyup', () => {
+		  item.style.height = calcHeight(item.value) + "px";
+	  }, false);
+  });
+}
+
+// Get scripts lists
+
+function grab_scripts(target_string, label) {
+  const scriptTags = document.querySelectorAll('script');
+  let collected_assets = '';
+
+  for (let scriptTag of scriptTags) {
+	const src = scriptTag.src;
+	if (src.includes(target_string)) {
+	  const remainingText = target_string + src.split('?')[0].substring(src.indexOf(target_string) + target_string.length);
+	  if (remainingText) {
+		collected_assets += `${remainingText}\n`;
+	  }
+
+	}
+  }
+
+  if (label === "Inline") {
+	for (let scriptTag of scriptTags) {
+	  const src = scriptTag.src;
+	  if (! src.length) {
+		collected_assets += `${scriptTag.outerHTML}\n`;
+	  }
+	}
+  }
+
+
+  if (collected_assets) {
+	collected_assets = collected_assets.split("\n");
+	collected_assets = collected_assets.filter(line => line.trim() !== "");
+	collected_assets.sort();
+	collected_assets = collected_assets.join("\n");
+	console.log('%c' + label, 'font-size: 1rem');
+	console.log(collected_assets);
+  }
+}
+
+function grab_inline_scripts(target_string, label) {
+  const scripts = Array.from(document.getElementsByTagName('script'));
+  const scriptTags = scripts.filter(script => !script.src);
+  let collected_assets = '';
+
+  for (let scriptTag of scriptTags) {
+	collected_assets += `${scriptTag.outerHTML}\n`;
+  }
+
+  if (collected_assets) {
+	collected_assets = collected_assets.split("\n");
+	collected_assets = collected_assets.filter(line => line.trim() !== "");
+	collected_assets.sort();
+	collected_assets = collected_assets.join("\n");
+	console.log('%c' + label, 'font-size: 1rem');
+	console.log(collected_assets);
+  }
+}
+
+function list_scripts() {
+  grab_scripts('/wp-content/themes', 'Themes');
+  grab_scripts('/wp-content/plugins', 'Plugins');
+  grab_inline_scripts('', 'Inline Scripts');
+}
+
+function fire() {
+	create_element(document.body, 'wpr_tester_wrapper', tester_html, 'hidden');
+	create_element(document.body, 'wpr_wrapper', inspector_html);
+	let style = document.createElement('style');
+	style.innerHTML = css_code;
+	style.classList.add('wpr_inspector_style');
+	document.head.append(style);
+	wpr_checks();
+	if (getCookie("rucss_tester") == "added") {
+		document.querySelector('.wpr_tester_wrapper_element').removeAttribute('hidden');
+	}
+	rucss_wprtextareas_data_management_populate_by_name();
+	rucss_wprtextareas_data_management_store();
+	textarea_responsive();
+}
+
+function delay(time) {
+  return new Promise(resolve => setTimeout(resolve, time));
+}
+
+
+
+detectIncognito().then((result) => {
+	if(result.isPrivate) {
+	setTimeout(
+	function() { fire() }, 1000);
+	}
+});
