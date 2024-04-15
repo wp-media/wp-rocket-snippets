@@ -1,0 +1,13 @@
+// WP Rocket custom compatibility with Elementor
+// Clears the cache of minified files when an Elementor draft is saved
+
+function clear_minified_files_after_elementor_draft_is_saved() {
+
+	if ( function_exists('rocket_clean_minify') ) {
+
+		rocket_clean_minify();
+
+	}
+}
+
+add_action( 'elementor/editor/after_save', 'clear_minified_files_after_elementor_draft_is_saved');
