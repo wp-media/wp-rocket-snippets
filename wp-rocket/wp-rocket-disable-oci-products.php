@@ -22,13 +22,12 @@ function no_atf_for_products() {
 		return false;
 	}
 
-/**
- * Disable OCI optimization on:
- * - single product pages
- */
-if( is_product() ) {
-	
-	add_filter( 'rocket_above_the_fold_optimization', '__return_false' );
+	/**
+	 * Disable OCI optimization on:
+	 * - single product pages
+	 */
+	if( is_product() ) {	
+		add_filter( 'rocket_above_the_fold_optimization', '__return_false' );
 	}
 }
 add_filter( 'wp',  __NAMESPACE__ .'\no_atf_for_products' );
