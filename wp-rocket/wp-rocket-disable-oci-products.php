@@ -17,11 +17,8 @@ defined( 'ABSPATH' ) or die();
 
 function no_atf_for_products() {
 
-	// Make sure WooCommerce is active and running.
-	if (
-		   ! class_exists( 'WooCommerce' )
-		|| ! function_exists( 'is_product' )
-		) {
+	// Make sure is_product is present.
+	if (! function_exists( 'is_product' )) {
 		return false;
 	}
 
@@ -30,6 +27,7 @@ function no_atf_for_products() {
  * - single product pages
  */
 if( is_product() ) {
+	
 	add_filter( 'rocket_above_the_fold_optimization', '__return_false' );
 	}
 }
