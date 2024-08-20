@@ -27,12 +27,10 @@ function no_preload_for_attachments( array $regexes ) : array {
     
     // Stop if is a WordPress attachment
     if (is_attachment()) {
+        // Add it to the Preload exclusion
         $regexes[] = $new_regex;
         return $regexes;
     }
-    
-    // Add it to the Preload exclusion
-    $regexes[] = $new_regex;
     
     return $regexes;
 
