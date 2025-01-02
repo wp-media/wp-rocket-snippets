@@ -33,10 +33,10 @@
     <input type="number" id="port" name="port" placeholder="80"  value="<?php if ($_POST['post']=='') { echo  "80"; } else { echo $_POST['post']; } ?>"><br>
     <small>Standard Ports (80 for HTTP, 443 for HTTPS)</small>
         </p>
-    <label for="protocol">Method:</label>
-    <select id="protocol" name="protocol">
-        <option value="http" <?php if ($_POST['protocol']=='PURGE') { echo  'selected="selected"'; }?> >PURGE</option>
-        <option value="https" <?php if ($_POST['protocol']=='BAN') { echo  'selected="selected"'; }?>>BAN</option>
+    <label for="method">Method:</label>
+    <select id="method" name="method">
+        <option value="PURGE" <?php if ($_POST['method']=='PURGE') { echo  'selected="selected"'; }?> >PURGE</option>
+        <option value="BAN" <?php if ($_POST['method']=='BAN') { echo  'selected="selected"'; }?>>BAN</option>
     </select><br>
       <small>Default method is PURGE, you can try BAN</small></p>
     <p>
@@ -86,4 +86,3 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 </body>
 </html>
-
