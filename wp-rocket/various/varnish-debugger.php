@@ -30,7 +30,7 @@
     <p>
 
     <label for="port">Port:</label>
-    <input type="number" id="port" name="port" placeholder="80"  value="<?php if ($_POST['post']=='') { echo  "80"; } else { echo $_POST['post']; } ?>"><br>
+    <input type="number" id="port" name="port" placeholder="80"  value="<?php if ($_POST['port']=='') { echo  "80"; } else { echo $_POST['port']; } ?>"><br>
     <small>Standard Ports (80 for HTTP, 443 for HTTPS)</small>
         </p>
     <label for="method">Method:</label>
