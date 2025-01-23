@@ -18,9 +18,6 @@ defined('ABSPATH') or die();
 function wpr_clear_oci( $the_post ) {
 	
 	$the_post = rtrim($the_post,"/");
-	 
-	 error_log("\n Post: " . print_r($the_post, true), 3, ABSPATH . "/wp-content/wpr-logs/oci.txt");
-
 
 	global $wpdb;
     $wpdb->delete($wpdb->prefix."wpr_above_the_fold", array( 'url' => $the_post ));
