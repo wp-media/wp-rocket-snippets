@@ -1,4 +1,6 @@
 <?php
+// Load WordPress - needed if using this snippet in a standalone PHP file.
+require( 'wp-load.php' );
 
 // Clear Priority Elements
 
