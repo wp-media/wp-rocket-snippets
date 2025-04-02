@@ -20,6 +20,6 @@ To be used with:
 
 
 
-Last tested with:D
+Last tested with:
 * WP Rocket 3.18.3
 * WordPress 6.7.2
