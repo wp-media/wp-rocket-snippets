@@ -2,7 +2,7 @@
 
 For compatibility reasons, [some scripts](https://github.com/wp-media/wp-rocket/blob/trunk/dynamic-lists.json) are automatically excluded from Delay JavaSscript Execution feature to prevent potential issues with site functionality. Removing a script using this Helper Plugin will allow the script to be delayed.
 
-⚠️ It is advised to use this with causion as delaying scripts may cause issues. Please test your site thoroughly after making changes.
+⚠️ It is advised to use this with caution as delaying scripts may cause issues. Please test your site thoroughly after making changes.
 
 
 📝&#160;&#160;**Manual editing required before use**
