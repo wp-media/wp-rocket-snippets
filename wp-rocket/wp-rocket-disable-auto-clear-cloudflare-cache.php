@@ -24,7 +24,7 @@ function disable_clearing_cloudflare_cache() {
 
   $event_manager->remove_callback( 'after_rocket_clean_domain', [ $cloudflare_plugin_subscriber, 'purge_cloudflare' ] );
   $event_manager->remove_callback( 'after_rocket_clean_files', [ $cloudflare_plugin_subscriber, 'purge_cloudflare_partial' ] );
-  $event_manager->remove_callback( 'rocket_rucss_complete_job_status', [ $cloudflare_plugin_subscriber, 'purge_cloudflare_after_usedcss' ] );
+  $event_manager->remove_callback( 'rocket_saas_complete_job_status', [ $cloudflare_plugin_subscriber, 'purge_cloudflare_after_usedcss' ] );
   $event_manager->remove_callback( 'rocket_rucss_after_clearing_usedcss', [ $cloudflare_plugin_subscriber, 'purge_cloudflare_after_usedcss' ] );
 }
 add_action( 'admin_init', __NAMESPACE__ . '\disable_clearing_cloudflare_cache', 99999999999 );
