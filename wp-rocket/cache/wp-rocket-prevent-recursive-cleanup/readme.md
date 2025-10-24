@@ -4,7 +4,6 @@ Prevents WP Rocket from **recursively deleting cache folders** for specific fold
 
 This helps preserve multilingual cache structures or custom folder-based caches with parent-childen relationshios, that shouldn’t be entirely wiped during purge operations.
 
----
 
 ## How it works
 
@@ -14,7 +13,6 @@ When WP Rocket triggers a cache purge (e.g. after post update or manual purge), 
 2. Deletes **only** the top-level cache files (`index.html` and `index.html_gzip`) inside that folder.
 4. Marks the corresponding cache entry as **pending** in WP Rocket’s internal cache table (`wpr_rocket_cache`).
 
----
 
 ## Configuration
 
@@ -35,7 +33,6 @@ function rocket_fix_get_protected_urls() {
 Add or remove any folders you want WP Rocket to skip during recursive purges.
 
 
----
 
 ## Tested with
 
