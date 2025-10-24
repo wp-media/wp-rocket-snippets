@@ -15,20 +15,32 @@
         .results {font-family: monospace;  word-wrap: break-word; background-color: #FFF; padding: 10px; border: 2px dashed #C00; border-radius: 10px; display: inline-block; margin-top: 2rem; font-size: 20px;	}
         .results.error {color: #C00;}
         .results.success {color: #0C0;border: 2px dashed #0C0;}
+        
     </style>
 </head>
 <body>
 
 <h2>Varnish Debugger</h2>
 
-<form method="post" action="">
-    <p>
+<form method="post" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']) . '?' . rand(); ?>">
+	<p>
     <label for="ip">IP:</label>
     <input type="text" id="ip" name="ip" placeholder="127.0.0.1" value="<?php echo $_POST['ip']?>" size="30"><br>
     <small>Standard IP is 127.0.0.1, if Cloudflare is used try the domain name instead</small>
     </p>
-    <p>
 
+    <p>
+    <label for="port">Host:</label>
+    <input type="text" id="host" name="host" placeholder=""  value="<?php if ($_POST['host']=='') { echo  ""; } else { echo $_POST['host']; } ?>"><br>
+    <small>Add the host if you need to pass it as part of the Head request. useful if a proxy is being used. No protocol (https:// or http://)</small>
+    </p>
+
+    <p>
+    <label for="port">Path:</label>
+    <input type="text" id="path" name="path" placeholder="/"  value="<?php if ($_POST['path']=='') { echo  "/"; } else { echo $_POST['path']; } ?>"><br>
+    <small>Add the slug of a URL if you want to test a single post cleanup. Leave it empty to clear the whole cache</small>
+        </p
+		<p>
     <label for="port">Port:</label>
     <input type="number" id="port" name="port" placeholder="80"  value="<?php if ($_POST['port']=='') { echo  "80"; } else { echo $_POST['port']; } ?>"><br>
     <small>Standard Ports (80 for HTTP, 443 for HTTPS)</small>
@@ -55,29 +67,40 @@
 <?php
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
+    echo '<pre>';
+	var_dump($_POST);
+    echo '</pre>';
+
     // Retrieve form data
     $ip = $_POST["ip"];
     $port = $_POST["port"];
     $method = $_POST["method"];
     $protocol = $_POST["protocol"];
-
+	//$host = "staging7.balcanicaucaso.org";
+	$host = $_POST["host"];
+	$path = $_POST["path"];
 
 
     // Build the URL for the purge request
-    $url = "{$protocol}://{$ip}:{$port}/";
+    $url = "{$protocol}://{$ip}:{$port}{$path}";
 
     // Send the purge request (adjust as needed)
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method); 
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    if($_POST["host"] !="") {
+    	curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        	"Host: {$host}"
+		]);
+    }
     $response = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
 
     // Handle the response
     if ($httpCode == 200) {
-        echo "<div class='results success'>Varnish purge request sent successfully</div>";
+        echo "<div class='results success'>Varnish purge request succeed</div>";
     } else {
         echo "<div class='results error'>Error sending Varnish purge request. HTTP code: {$httpCode}</div>";
     }
