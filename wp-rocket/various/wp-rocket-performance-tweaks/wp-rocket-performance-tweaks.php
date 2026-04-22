@@ -54,7 +54,7 @@ add_action( 'plugins_loaded', function() {
             
             
             //RUCSS MINIMUM CSS FILE SIZE (in bytes, default is 150)
-            'rocket_min_rucss_size' => 10000, // 10kb
+            'rocket_min_rucss_size' => 24000, // 24kb
 
         // STOP EDITING
         ];
