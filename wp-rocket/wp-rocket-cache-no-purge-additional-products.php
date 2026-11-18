@@ -1,5 +1,16 @@
 <?php
 /**
+ * This helper has moved.
+ *
+ * WP Rocket | Remove additional URLs from product purge now lives here:
+ * https://github.com/wp-media/wp-rocket-snippets/tree/main/wp-rocket/cache/wp-rocket-cache-no-purge-additional-products/
+ *
+ * The new version (2.0.0+) can limit the purge to WooCommerce order stock
+ * changes only, keep the homepage cache and exclude specific products.
+ * See its README for setup and how to replace this old version.
+ */
+
+/**
  * Plugin Name: WP Rocket | Remove additional URLs from product purge
  * Description: Removes additional URLs from WP Rocket’s automatic cache purging when a product is updated.
  * Plugin URI:  https://github.com/wp-media/wp-rocket-helpers/tree/master/wp-rocket-cache-no-purge-additional-products/
